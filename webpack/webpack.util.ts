@@ -79,7 +79,7 @@ export async function getWebViewEntries(): Promise<webpack.EntryObject> {
 
 // #endregion
 
-// #region not shared with others
+// #region sort-of shared with https://github.com/paranext/paranext-multi-extension-template/blob/main/webpack/webpack.util.ts
 
 /** Folder containing the source files for the extensions */
 export const sourceFolder = 'src';
@@ -112,6 +112,8 @@ const staticFiles: {
   { from: 'public', to: './', noErrorOnMissing: true },
   // Distribute the extension's assets
   { from: 'assets', noErrorOnMissing: true },
+  // Distribute the extension's contributions
+  { from: 'contributions', noErrorOnMissing: true },
   // Distribute the extension manifest
   { from: 'manifest.json' },
   // We need to distribute the package.json for Platform.Bible to read the extension properly
@@ -123,13 +125,16 @@ const staticFiles: {
   { from: '<name>.d.ts', noErrorOnMissing: true },
   // Copy the type declaration file into the output folder based on its listing in `manifest.types`
   { from: '<types>', noErrorOnMissing: true },
+  // Copy the menu JSON file into the output folder based on its listing in `manifest.menus`
+  { from: '<menus>', noErrorOnMissing: true },
 ];
 
 /** Get the actual static file name from the template static file name */
 function getStaticFileName(staticFile: string, extensionInfo: ExtensionInfo) {
   return staticFile
     .replace(/<name>/g, extensionInfo.name)
-    .replace(/<types>/g, extensionInfo.types ?? '');
+    .replace(/<types>/g, extensionInfo.types ?? '')
+    .replace(/<menus>/g, extensionInfo.menus ?? '');
 }
 
 /** Get CopyFile plugin patterns for copying static files for an extension */
@@ -144,23 +149,29 @@ function getCopyFilePatternsForExtension(extension: ExtensionInfo) {
     ];
   }
 
-  return staticFiles.map((staticFile): Pattern => {
-    // The extension should be bundled normally
-    /** The input path to the file to copy but without the source or the output folder */
-    const internalFilePathFrom = path.join(
-      extension.dirName,
-      getStaticFileName(staticFile.from, extension),
-    );
-    /** The output path to the file to copy but without the source or the output folder */
-    const internalFilePathTo = staticFile.to
-      ? path.join(extension.dirName, getStaticFileName(staticFile.to, extension))
-      : internalFilePathFrom;
-    return {
-      from: path.join(sourceFolder, internalFilePathFrom),
-      to: internalFilePathTo,
-      noErrorOnMissing: staticFile.noErrorOnMissing,
-    };
-  });
+  // The extension should be bundled normally
+  // Remove 'undefined' from the return value because the filter takes them out
+  // eslint-disable-next-line no-type-assertion/no-type-assertion
+  return staticFiles
+    .map((staticFile): Pattern | undefined => {
+      const staticFileFrom = getStaticFileName(staticFile.from, extension);
+      if (!staticFileFrom) return undefined;
+      // The input path to the file to copy but without the source or the output folder
+      const internalFilePathFrom = path.join(
+        extension.dirName,
+        getStaticFileName(staticFileFrom, extension),
+      );
+      // The output path to the file to copy but without the source or the output folder
+      const internalFilePathTo = staticFile.to
+        ? path.join(extension.dirName, getStaticFileName(staticFile.to, extension))
+        : internalFilePathFrom;
+      return {
+        from: path.join(sourceFolder, internalFilePathFrom),
+        to: internalFilePathTo,
+        noErrorOnMissing: staticFile.noErrorOnMissing,
+      };
+    })
+    .filter((value) => !!value) as Pattern[];
 }
 
 /**
@@ -266,6 +277,8 @@ type ExtensionManifest = {
    * for more information about extension type declaration files.
    */
   types?: string;
+  /** Path to the JSON file that defines the menu items this extension is adding. */
+  menus?: string;
   activationEvents: string[];
 };
 
@@ -360,3 +373,5 @@ export async function getExtensions(): Promise<ExtensionInfo[]> {
     )
   ).filter((extensionInfo) => extensionInfo) as ExtensionInfo[];
 }
+
+// #endregion
