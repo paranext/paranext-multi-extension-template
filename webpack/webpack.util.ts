@@ -157,10 +157,7 @@ function getCopyFilePatternsForExtension(extension: ExtensionInfo) {
       const staticFileFrom = getStaticFileName(staticFile.from, extension);
       if (!staticFileFrom) return undefined;
       // The input path to the file to copy but without the source or the output folder
-      const internalFilePathFrom = path.join(
-        extension.dirName,
-        getStaticFileName(staticFileFrom, extension),
-      );
+      const internalFilePathFrom = path.join(extension.dirName, staticFileFrom);
       // The output path to the file to copy but without the source or the output folder
       const internalFilePathTo = staticFile.to
         ? path.join(extension.dirName, getStaticFileName(staticFile.to, extension))
