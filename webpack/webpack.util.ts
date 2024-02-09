@@ -79,7 +79,7 @@ export async function getWebViewEntries(): Promise<webpack.EntryObject> {
 
 // #endregion
 
-// #region sort-of shared with https://github.com/paranext/paranext-multi-extension-template/blob/main/webpack/webpack.util.ts
+// #region not shared with others
 
 /** Folder containing the source files for the extensions */
 export const sourceFolder = 'src';
