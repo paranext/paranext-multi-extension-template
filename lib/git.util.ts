@@ -244,13 +244,7 @@ export async function formatExtensionFolder(extensionFolderPath: string) {
     // Read the types file content
     let typesFileContent = await fs.readFile(newTypesFilePath, 'utf8');
 
-    // Replace the module declaration
-    typesFileContent = typesFileContent.replace(
-      /declare module 'paranext-extension-template'/g,
-      `declare module '${extensionName}'`,
-    );
-
-    // Replace any other occurrences of the template name
+    // Replace all occurrences of the template name
     typesFileContent = typesFileContent.replace(/paranext-extension-template/g, extensionName);
 
     // Write the updated content back to the file

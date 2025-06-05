@@ -21,27 +21,6 @@ To make the process of customizing from the template as smooth as possible, we r
 - [Install and set up this repo](#to-install)
 - [Update this repo from the template](#to-update-this-repo-and-extensions-from-the-templates) to hook everything up for smooth updates in the future
 
-#### Replace placeholders
-
-For your extension name, we recommend that you use [lowerCamelCase](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) in some contexts and [kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case) in other contexts. We generally recommend lowerCamelCase when using the name in code (like making a new command on the PAPI, for example), and we recommend kebab-case when using the name in relation to the file system, the repository, `npm`, and the extension's `.d.ts` types module. The following instructions are written accordingly.
-
-- At the top of this `README.md`:
-
-  - Replace the first line `# paranext-multi-extension-template` with `# your-extension-repo-name` (kebab-case)
-  - Below the first line, replace the repo description with your own description
-
-- In `package.json`:
-
-  - Replace `paranext-multi-extension-template` with `your-extension-repo-name` (kebab-case)
-  - Update ownership information and other relevant fields as desired
-
-- In `LICENSE`:
-
-  - Adjust as desired (feel free to choose a different license)
-  - If you choose to stay with the current license, update the copyright statement
-
-- In `.github/assets/release-body.md`, make adjustments as desired
-
 #### Create your first extension in this repo
 
 Follow the steps in [To create a new extension in this repo](#to-create-a-new-extension-in-this-repo) to create your first extension in this repo! You can follow the same steps to create new extensions as desired.
@@ -214,8 +193,7 @@ npm run create-extension -- <extension-name>
 
 Then follow [the instructions for customizing the new extension](https://github.com/paranext/paranext-extension-template#customize-extension-details) with a few modifications:
 
-- Follow the instructions for replacing placeholders inside the `src/<extension-name>` folder, not at this repo root, except in specific situations:
-  - Instead of editing the `.github/assets/release-body.md` inside the extension, add information about the new extension in `.github/assets/release-body.md` at this repo root.
+ - Instead of editing the `.github/assets/release-body.md` inside the extension, add information about the new extension in `.github/assets/release-body.md` at this repo root.
 
 **Note:** The merge/squash commits created when creating a new extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
 
@@ -238,8 +216,26 @@ the file paths pointing to `paranext-core`:
 - Find: `([^/])\.\.\/paranext-core`
 - Replace with: `$1../../../paranext-core`
 
-You can ignore occurrences from many files. Please see [`./lib/git.util.ts`](./lib/git.util.ts) -> `formatExtensionFolder` for more
-information.
+You can ignore occurrences from many files. 
+
+- At the top of this `README.md`:
+
+  - Replace the first line `# paranext-multi-extension-template` with `# your-extension-repo-name` (kebab-case)
+  - Below the first line, replace the repo description with your own description
+
+- In `package.json`:
+
+  - Replace `paranext-multi-extension-template` with `your-extension-repo-name` (kebab-case)
+  - Update ownership information and other relevant fields as desired
+
+- In `LICENSE`:
+
+  - Adjust as desired (feel free to choose a different license)
+  - If you choose to stay with the current license, update the copyright statement
+
+- In `.github/assets/release-body.md`, make adjustments as desired
+
+Please see [`./lib/git.util.ts`](./lib/git.util.ts) -> `formatExtensionFolder` for more information.
 
 </details>
 
