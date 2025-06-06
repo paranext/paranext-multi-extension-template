@@ -155,6 +155,38 @@ export async function fetchFromSingleTemplate() {
 }
 
 /**
+ * Converts kebab-case into camelCase. Assumes that the input is a valid kebab-case string
+ *
+ * Current implementation supports only UTF-16.
+ */
+function toCamelCaseFromKebab(input: string): string {
+  if (!input) return '';
+
+  // Split on common delimiters: hyphens, underscores, spaces, and dots
+  const parts = input.split('-');
+
+  // If there's only one part, return it as-is (already camelCase or single word)
+  if (parts.length <= 1) {
+    return input.charAt(0).toLocaleLowerCase() + input.slice(1);
+  }
+
+  // Convert first part to lowercase, then capitalize first letter of subsequent parts
+  const camelCased = parts
+    .map((part, index) => {
+      if (!part) return '';
+
+      if (index === 0) {
+        return part.charAt(0).toLocaleLowerCase() + part.slice(1);
+      } else {
+        return part.charAt(0).toLocaleUpperCase() + part.slice(1);
+      }
+    })
+    .join('');
+
+  return camelCased;
+}
+
+/**
  * Format an extension folder to make the extension template folder work as a subfolder of this repo
  *
  * This function may be called many times for one extension folder, so make sure all operations work
@@ -165,7 +197,7 @@ export async function fetchFromSingleTemplate() {
 export async function formatExtensionFolder(extensionFolderPath: string) {
   // Get the basename of the extension folder for use in replacements
   const extensionName = path.basename(extensionFolderPath);
-  const extensionNameCamelCase = extensionName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  const extensionNameCamelCase = toCamelCaseFromKebab(extensionName);
 
   // Replace ../paranext-core with ../../../paranext-core to fix ts-config and package.json and such
   const results = await replaceInFile({
