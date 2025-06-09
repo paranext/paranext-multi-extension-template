@@ -213,7 +213,8 @@ npm run create-extension -- <extension-name>
 ```
 
 Then follow [the instructions for customizing the new extension](https://github.com/paranext/paranext-extension-template#customize-extension-details) with a few modifications:
- - All of the places where it says to replace the extension name in [Replace Placeholders](https://github.com/paranext/paranext-extension-template#replace-placeholders) have been automated 
+ - All of the places where it says to replace the extension name in [Replace Placeholders](https://github.com/paranext/paranext-extension-template#replace-placeholders) have been automated,
+   the other instructions there should apply inside the `src/<extension-name>` folder, not at this repo root.
  - Instead of editing the `.github/assets/release-body.md` inside the extension, add information about the new extension in `.github/assets/release-body.md` at this repo root.
 
 **Note:** The merge/squash commits created when creating a new extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
