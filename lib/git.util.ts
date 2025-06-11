@@ -177,9 +177,8 @@ function toCamelCaseFromKebab(input: string): string {
 
       if (index === 0) {
         return part.charAt(0).toLocaleLowerCase() + part.slice(1);
-      } else {
-        return part.charAt(0).toLocaleUpperCase() + part.slice(1);
       }
+      return part.charAt(0).toLocaleUpperCase() + part.slice(1);
     })
     .join('');
 
