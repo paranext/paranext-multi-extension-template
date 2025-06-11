@@ -1,4 +1,4 @@
-name: Build
+name: Lint
 
 on:
   push:
@@ -10,11 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  lint-and-build:
+  lint:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,6 +32,3 @@ jobs:
 
       - name: Run format checking
         run: npm run format:check
-
-      - name: Run build
-        run: npm run build
