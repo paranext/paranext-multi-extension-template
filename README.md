@@ -8,7 +8,7 @@ Template for creating multiple Platform.Bible extensions in one repo
 
 This is a Webpack project template pre-configured to build an arbitrary number of Platform.Bible extensions. It includes only the bare essentials required for a multi-extension repository to work.
 
-Note that many of the files mentioned in [Summary](#summary) are not present in this template because they describe extension code which must be added to this template. For examples of what extensions in a multi-extension repo might look like, refer to any repo based on this template.  — for instance, the [platform-bible-sample-extensions](https://github.com/paranext/platform-bible-sample-extensions).
+Note that many of the files mentioned in [Summary](#summary) are not present in this template because they describe extension code which must be added to this template. For examples of what extensions in a multi-extension repo might look like, refer to any repo based on this template. — for instance, the [platform-bible-sample-extensions](https://github.com/paranext/platform-bible-sample-extensions).
 
 **Important:** Before proceding to use this template, consider whether you intend to build a single extension to be packaged and installed independently, or a set of related extensions that should be used together. If the former, it would be better to use the simple [template pre-configured to build a single Platform.Bible extension](https://github.com/paranext/paranext-extension-template).
 
@@ -188,8 +188,8 @@ These steps will walk you through releasing a version on GitHub and bumping the 
    ```
 
    Or bump versions manually:
-   
-<!-- END SYNC [Publishing-part1] version 07-28-2025 -->
+
+   <!-- END SYNC [Publishing-part1] version 07-28-2025 -->
 
    ```bash
    git checkout -b bump-versions-<next_version>
