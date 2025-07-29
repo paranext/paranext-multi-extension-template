@@ -83,6 +83,8 @@ This is a Webpack project configured to build Platform.Bible extensions. The gen
 - `dist/` is a generated folder containing the built extension files
 - `release/` is a generated folder containing zips of the built extension files
 
+> See the [Extension Anatomy wiki page](https://github.com/paranext/paranext-extension-template/wiki/Extension-Anatomy) for more information about the various files that comprise extensions and their relationships to each other.
+
 <!-- BEGIN SYNC [Install-Part1] version 07-28-2025 -->
 
 ## To install
