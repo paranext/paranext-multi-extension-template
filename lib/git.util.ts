@@ -300,15 +300,9 @@ async function deleteUnusedPackageLockIfPresent(repoRootRelativePath: string): P
   }
 }
 
-/**
- * Format the repo root folder after a merge from the multi-extension template.
- *
- * Currently a no-op placeholder (the root `package-lock.json` is the monorepo lock file and is not
- * an unused workspace lock file). Exists as a named function to serve as a home for future
- * root-level formatting steps.
- */
+/** Format the repo root folder after a merge from the multi-extension template. */
 export async function formatExtensionsRoot() {
-  await deleteUnusedPackageLockIfPresent('package-lock.json');
+  // Currently a noop placeholder - add root-level formatting operations here in the future
 }
 
 /**
