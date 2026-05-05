@@ -96,6 +96,11 @@
     "webpack-merge": "^6.0.1",
     "zip-folder-promise": "^1.2.0"
   },
+  "overrides": {
+    "eslint-config-airbnb": {
+      "eslint-plugin-react-hooks": "$eslint-plugin-react-hooks"
+    }
+  },
   "workspaces": ["src/*"],
   "volta": {
     "node": "22.22.0"
