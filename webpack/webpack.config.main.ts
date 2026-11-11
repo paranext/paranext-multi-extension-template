@@ -4,6 +4,7 @@ import merge from 'webpack-merge';
 import CopyPlugin from 'copy-webpack-plugin';
 import configBase, { rootDir } from './webpack.config.base';
 import WebViewResolveWebpackPlugin from './web-view-resolve-webpack-plugin';
+import { EmitShippedModulesPlugin } from './emit-shipped-modules-plugin';
 import {
   outputFolder,
   getExtensions,
@@ -61,6 +62,11 @@ const configMain: () => Promise<webpack.Configuration> = async () => {
       // Copy static files to the output folder https://webpack.js.org/plugins/copy-webpack-plugin/
       new CopyPlugin({
         patterns: getMainCopyFilePatterns(extensions),
+      }),
+      // Lists the modules this build bundled, for third-party license notices
+      new EmitShippedModulesPlugin({
+        bundleName: 'extension-main',
+        outputDir: path.join(rootDir, '.notices', 'modules'),
       }),
     ],
   });
