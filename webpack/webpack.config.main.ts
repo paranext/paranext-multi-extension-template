@@ -6,6 +6,7 @@ import configBase, { rootDir } from './webpack.config.base';
 import WebViewResolveWebpackPlugin from './web-view-resolve-webpack-plugin';
 import { EmitShippedModulesPlugin } from './emit-shipped-modules-plugin';
 import {
+  noticesManifestFolder,
   outputFolder,
   getExtensions,
   getMainCopyFilePatterns,
@@ -66,7 +67,7 @@ const configMain: () => Promise<webpack.Configuration> = async () => {
       // Lists the modules this build bundled, for third-party license notices
       new EmitShippedModulesPlugin({
         bundleName: 'extension-main',
-        outputDir: path.join(rootDir, '.notices', 'modules'),
+        outputDir: path.join(rootDir, noticesManifestFolder),
       }),
     ],
   });
