@@ -5,7 +5,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
 import merge from 'webpack-merge';
 import configBase, { rootDir } from './webpack.config.base';
-import { getWebViewEntries } from './webpack.util';
+import { getWebViewEntries, noticesManifestFolder } from './webpack.util';
 import { EmitShippedModulesPlugin } from './emit-shipped-modules-plugin';
 
 /** Webpack configuration for building WebViews */
@@ -46,7 +46,7 @@ const configWebView: webpack.Configuration = merge(configBase, {
     // Lists the modules this build bundled, for third-party license notices
     new EmitShippedModulesPlugin({
       bundleName: 'extension-web-view',
-      outputDir: path.join(rootDir, '.notices', 'modules'),
+      outputDir: path.join(rootDir, noticesManifestFolder),
     }),
   ],
 });
