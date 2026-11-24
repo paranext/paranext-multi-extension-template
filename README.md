@@ -286,6 +286,8 @@ To safely rename an extension:
 
 This process ensures that template update comparisons continue to work correctly.
 
+**Keeping the extension's history instead:** steps 2 and 3 delete the extension's files and create them again, so Git loses their history. To keep it, rename the folder with `git mv` after step 1, then update identifiers and references (step 4), commit, and [re-link the renamed folder to the template](#re-linking-an-extension-to-the-template) so template updates keep finding it.
+
 **Note:** The merge/squash commits created when renaming an extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
 
 ## To update this repo and extensions from the templates
@@ -332,6 +334,39 @@ git subtree pull --prefix src/<extension-name> paranext-extension-template main 
 ```
 
 </details>
+
+### Re-linking an extension to the template
+
+`npm run update-from-templates` finds each extension's last update from `paranext-extension-template` through the squashed subtree commits Git recorded under the extension's folder name. If it says a folder "was never added as a subtree", it skips that folder, so the folder gets none of the template's changes. What to do depends on why:
+
+- **The folder was never based on the template**, and you now want it to be: move the folder elsewhere, run `npm run create-extension -- <extension-name>`, move the folder's contents back in, and evaluate all working changes before committing. This brings in the template's files, and you review the differences once.
+- **The folder was based on the template under another name** (it was renamed, for example with `git mv`): re-link it, as below. This keeps the folder's history and brings in only the template changes since its last update.
+- **The folder was based on the template, but its subtree commits are gone** (for example, a history rewrite or a squash merge dropped them): re-link it as below, but find the template commit as described after the steps.
+
+To re-link a renamed folder, in Git Bash or another POSIX shell, from the repository root, with no working changes (replace `<old-folder>` and `<new-folder>` with the folder's old and new paths from the repository root, such as `src/old-name` and `src/new-name`):
+
+1. Find the template commit the folder was last updated to, from the subtree commits recorded under its old name:
+
+   ```bash
+   git log -1 --format='%h %s%n%b' --grep='^git-subtree-dir: <old-folder>/*$' HEAD
+   ```
+
+   The subject must start with `Squashed '<old-folder>/'`. If it doesn't (for example, a squash-merged pull request copied those lines into its message), look further back with `git log --grep='^git-subtree-dir: <old-folder>/*$' HEAD` for the newest commit whose subject does. Its `git-subtree-split:` line is the template commit.
+
+2. Record that commit against the new folder name with a merge that changes no files:
+
+   ```bash
+   git fetch paranext-extension-template main
+   SPLIT=<the full git-subtree-split hash from step 1>
+   FOLDER=<new-folder>
+   MARKER=$(printf "Squashed '%s/' content from commit %s\n\ngit-subtree-dir: %s\ngit-subtree-split: %s\n" "$FOLDER" "${SPLIT:0:7}" "$FOLDER" "$SPLIT" | git commit-tree "$SPLIT^{tree}")
+   git merge -s ours --no-ff --allow-unrelated-histories "$MARKER" -m "Re-link $FOLDER to paranext-extension-template" -m "Merge commit '$MARKER' as '$FOLDER'"
+   git diff HEAD~1 HEAD --stat   # must print nothing
+   ```
+
+3. Run `npm run update-from-templates`. It now updates the folder from that template commit; resolve any conflicts as usual. Running it again should report that the folder's subtree is already up to date.
+
+If the folder's subtree commits are gone, there is no record to read in step 1. Instead, use the template commit whose files best match the folder: for a candidate commit, `git diff --shortstat <template-commit> HEAD:<new-folder>` shows how much differs. If you can't tell, choose an older commit: the update then replays more template changes, and any that conflict with the folder show up as merge conflicts to resolve.
 
 ## Special features in this project
 
