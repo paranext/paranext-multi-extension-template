@@ -343,7 +343,9 @@ git subtree pull --prefix src/<extension-name> paranext-extension-template main 
 - **The folder was based on the template under another name** (it was renamed, for example with `git mv`): re-link it, as below. This keeps the folder's history and brings in only the template changes since its last update.
 - **The folder was based on the template, but its subtree commits are gone** (for example, a history rewrite or a squash merge dropped them): re-link it as below, but find the template commit as described after the steps.
 
-To re-link a renamed folder, in Git Bash or another POSIX shell, from the repository root, with no working changes (replace `<old-folder>` and `<new-folder>` with the folder's old and new paths from the repository root, such as `src/old-name` and `src/new-name`):
+One case shows no warning at all: **a pull request that updated the folder from the template was squash-merged, or merged with a merge commit whose body listed its commits.** That copies the `git-subtree-dir:` and `git-subtree-split:` lines into a commit holding the whole repository, and the next update that brings in template changes starts from that commit: it quietly resets the extension's own changes to the template's versions and deletes files the template doesn't have, without a single conflict. To check, `git log -1 --format='%h %s' --grep='^git-subtree-dir: <folder>/*$' HEAD` should name a `Squashed '<folder>/' …` commit. If it names something else, undo any update made since that merge (for example `git revert -m 1 <that update's merge commit>`), then re-link the folder as below with its current path as both `<old-folder>` and `<new-folder>`. In step 1, use the bad commit's own `git-subtree-split:` if that update was complete, or the newest real `Squashed '…'` commit (the safe choice).
+
+To re-link a folder, from the repository root with no working changes, in bash, zsh, Git Bash or `sh` (not PowerShell or cmd). `<old-folder>` and `<new-folder>` are the folder's paths from the repository root, as the `update-from-templates` warning prints them (for example `src/old-name` and `src/new-name`):
 
 1. Find the template commit the folder was last updated to, from the subtree commits recorded under its old name:
 
@@ -359,14 +361,31 @@ To re-link a renamed folder, in Git Bash or another POSIX shell, from the reposi
    git fetch paranext-extension-template main
    SPLIT=<the full git-subtree-split hash from step 1>
    FOLDER=<new-folder>
-   MARKER=$(printf "Squashed '%s/' content from commit %s\n\ngit-subtree-dir: %s\ngit-subtree-split: %s\n" "$FOLDER" "${SPLIT:0:7}" "$FOLDER" "$SPLIT" | git commit-tree "$SPLIT^{tree}")
+   MARKER=$(printf "Squashed '%s/' content from commit %s\n\ngit-subtree-dir: %s\ngit-subtree-split: %s\n" "$FOLDER" "$(git rev-parse --short "$SPLIT")" "$FOLDER" "$SPLIT" | git commit-tree "$SPLIT^{tree}")
    git merge -s ours --no-ff --allow-unrelated-histories "$MARKER" -m "Re-link $FOLDER to paranext-extension-template" -m "Merge commit '$MARKER' as '$FOLDER'"
-   git diff HEAD~1 HEAD --stat   # must print nothing
+   git diff HEAD~1 HEAD --stat
+   git log -1 --format='%s' --grep="^git-subtree-dir: $FOLDER/*\$" HEAD
    ```
 
-3. Run `npm run update-from-templates`. It now updates the folder from that template commit; resolve any conflicts as usual. Running it again should report that the folder's subtree is already up to date.
+   What each command does:
 
-If the folder's subtree commits are gone, there is no record to read in step 1. Instead, use the template commit whose files best match the folder: for a candidate commit, `git diff --shortstat <template-commit> HEAD:<new-folder>` shows how much differs. If you can't tell, choose an older commit: the update then replays more template changes, and any that conflict with the folder show up as merge conflicts to resolve.
+   - `git fetch …` makes sure the template commit from step 1 is available locally.
+   - `MARKER=$(… | git commit-tree "$SPLIT^{tree}")` creates a commit holding the template's files as of `SPLIT`, without touching your files or your branch. Its message is the one `git subtree add --squash` would write: its `git-subtree-dir:` and `git-subtree-split:` lines are what `update-from-templates` looks for, and its files are what the next update compares against.
+   - `git merge -s ours --no-ff --allow-unrelated-histories …` adds that commit to your branch's history without changing any files: `-s ours` keeps your files, and `--allow-unrelated-histories` is needed because the commit has no parent.
+   - `git diff HEAD~1 HEAD --stat` must print nothing, which confirms the merge changed no files.
+   - The last `git log` must print `Squashed '<new-folder>/' content from commit …`. Git takes the newest matching commit by date, so this confirms the marker is the one the next update will use. If it prints another commit, that commit has the same timestamp as the marker (for example both made within the same second by a script): undo the merge with `git reset --hard HEAD~1`, wait a second, and run this step again.
+
+3. If you made this change on a branch, merge its pull request with a merge commit whose body is empty: clear the body in GitHub's merge dialog, or use `gh pr merge <number> --merge --body ""`. Don't squash or rebase it. A squash merge, or a merge commit whose body lists the branch's commits, copies the `git-subtree-*` lines into a commit holding the whole repository, which makes the next update overwrite the extension's changes; a rebase replays the marker, which has no parent, and adds the template's files at the repository root.
+
+4. Run `npm run update-from-templates`. It now updates the folder from that template commit; resolve any conflicts as usual. Running it again should report that the folder's subtree is already up to date.
+
+If the folder's subtree commits are gone, there is no record to read in step 1. Instead, use the template commit whose files best match the folder. This lists the newest 50 template commits with how much each differs from the folder:
+
+```bash
+for c in $(git rev-list --max-count=50 paranext-extension-template/main); do echo "$c $(git diff --shortstat "$c" HEAD:<new-folder>)"; done
+```
+
+Even the right commit shows some differences: the extension's own changes, and the adjustments `update-from-templates` makes to each folder (such as rewritten paths and removed lock files). If you can't tell, choose an older commit: the update then replays more template changes, and any that conflict with the folder show up as merge conflicts to resolve.
 
 ## Special features in this project
 

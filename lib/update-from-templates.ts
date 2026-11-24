@@ -115,7 +115,7 @@ async function handleConflicts(
       )
         // If this folder isn't a subtree, it may be intentionally not based on the template. Continue
         console.warn(
-          `${ext.dirName} was never added as a subtree of ${SINGLE_TEMPLATE_NAME}, so it was not updated. Feel free to ignore this if this folder is not supposed to be based on ${SINGLE_TEMPLATE_NAME}.\nIf this folder was based on ${SINGLE_TEMPLATE_NAME} under another name (it was renamed), or its subtree commits were lost, re-link it as the README's "Re-linking an extension to the template" section describes; that keeps its history.\nIf it was never based on ${SINGLE_TEMPLATE_NAME} and should be, move the folder elsewhere, run \`npm run create-extension -- ${ext.dirName}\`, drop the folder back in, and evaluate all working changes before committing.\n`,
+          `${ext.dirName} was never added as a subtree of ${SINGLE_TEMPLATE_NAME}, so it was not updated. Feel free to ignore this if this folder is not supposed to be based on ${SINGLE_TEMPLATE_NAME}.\nIf this folder was based on ${SINGLE_TEMPLATE_NAME} under another name (it was renamed), or its subtree commits were lost, re-link it as the README's "Re-linking an extension to the template" section describes, using ${ext.dirPathOSIndependent} as its folder path; that keeps its history.\nIf it was never based on ${SINGLE_TEMPLATE_NAME} and should be, move the folder elsewhere, run \`npm run create-extension -- ${ext.dirName}\`, drop the folder back in, and evaluate all working changes before committing.\n`,
         );
       else {
         // You can only fix merge conflicts on one subtree at a time, so stop
