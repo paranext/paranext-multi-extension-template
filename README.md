@@ -237,7 +237,7 @@ Then follow [the instructions for customizing the new extension](https://github.
   the other instructions there should apply inside the `src/<extension-name>` folder, not at this repo root.
 - Instead of editing the `.github/assets/release-body.md` inside the extension, add information about the new extension in `.github/assets/release-body.md` at this repo root.
 
-**Note:** The merge/squash commits created when creating a new extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
+**Note:** The merge/squash commits created when creating a new extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future. Merge such a pull request with a merge commit whose body is empty: a body that lists the branch's commits copies their subtree lines into the merge commit, which does the same damage as a squash.
 
 <details>
     <summary>[Optional] Creating a new extension manually</summary>
@@ -288,7 +288,7 @@ This process ensures that template update comparisons continue to work correctly
 
 **Keeping the extension's history instead:** steps 2 and 3 delete the extension's files and create them again, so Git loses their history. To keep it, rename the folder with `git mv` after step 1, then update identifiers and references (step 4), commit, and [re-link the renamed folder to the template](#re-linking-an-extension-to-the-template) so template updates keep finding it.
 
-**Note:** The merge/squash commits created when renaming an extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
+**Note:** The merge/squash commits created when renaming an extension are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future. Merge such a pull request with a merge commit whose body is empty: a body that lists the branch's commits copies their subtree lines into the merge commit, which does the same damage as a squash.
 
 ## To update this repo and extensions from the templates
 
@@ -304,7 +304,7 @@ If you encounter errors from merge conflicts, please resolve the merge conflicts
 
 For more information, read [the instructions on the Paranext Extension Template wiki](https://github.com/paranext/paranext-extension-template/wiki/Merging-Template-Changes-into-Your-Extension).
 
-**Note:** The merge/squash commits created when updating this repo and its extensions from the templates are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future.
+**Note:** The merge/squash commits created when updating this repo and its extensions from the templates are important; Git uses them to compare the files for future updates. If you edit this repo's Git history, please preserve these commits (do not squash them, for example) to avoid duplicated merge conflicts in the future. Merge such a pull request with a merge commit whose body is empty: a body that lists the branch's commits copies their subtree lines into the merge commit, which does the same damage as a squash. If you turn on auto-merge with `gh pr merge --auto --merge`, pass `--body ""`; without it, GitHub fills the body with the branch's commits.
 
 <details>
     <summary>[Optional] Update from the templates manually</summary>
@@ -343,7 +343,13 @@ git subtree pull --prefix src/<extension-name> paranext-extension-template main 
 - **The folder was based on the template under another name** (it was renamed, for example with `git mv`): re-link it, as below. This keeps the folder's history and brings in only the template changes since its last update.
 - **The folder was based on the template, but its subtree commits are gone** (for example, a history rewrite or a squash merge dropped them): re-link it as below, but find the template commit as described after the steps.
 
-One case shows no warning at all: **a pull request that updated the folder from the template was squash-merged, or merged with a merge commit whose body listed its commits.** That copies the `git-subtree-dir:` and `git-subtree-split:` lines into a commit holding the whole repository, and the next update that brings in template changes starts from that commit: it quietly resets the extension's own changes to the template's versions and deletes files the template doesn't have, without a single conflict. To check, `git log -1 --format='%h %s' --grep='^git-subtree-dir: <folder>/*$' HEAD` should name a `Squashed '<folder>/' …` commit. If it names something else, undo any update made since that merge (for example `git revert -m 1 <that update's merge commit>`), then re-link the folder as below with its current path as both `<old-folder>` and `<new-folder>`. In step 1, use the bad commit's own `git-subtree-split:` if that update was complete, or the newest real `Squashed '…'` commit (the safe choice).
+One case shows no warning at all: **a pull request that updated the folder from the template was squash-merged, or merged with a merge commit whose body listed its commits.** That copies the `git-subtree-dir:` and `git-subtree-split:` lines into a commit holding the whole repository, and the next update that brings in template changes starts from that commit: it quietly resets the extension's own changes to the template's versions and deletes files the template doesn't have, without a single conflict. It is usually noticed only after that update has run, when files have gone missing, and by then the update has written its own normal `Squashed '<folder>/' changes from …` record. So check the folder's whole list of sync records, newest first:
+
+```bash
+git log --format='%h %s' --grep='^git-subtree-dir: <folder>/*$' HEAD
+```
+
+Every line should start with `Squashed '<folder>/'`. If a line that doesn't (the bad commit) appears above the newest `Squashed '<folder>/' content from commit …` line (the folder's original add, or a re-link), the folder is affected, and every `Squashed '<folder>/' changes from …` line above the bad commit is an update that reset the extension's changes. Undo those updates, newest first (for example `git revert -m 1 <that update's merge commit>`), then re-link the folder as below with its current path as both `<old-folder>` and `<new-folder>`. In step 1, use the bad commit's own `git-subtree-split:` if the update it merged was complete; otherwise use the newest `Squashed '<folder>/' …` commit **older than the bad commit**. Never use a newer one: those belong to the updates you just undid, and re-linking to one tells the next update that its template changes are already in, so they are skipped for good.
 
 To re-link a folder, from the repository root with no working changes, in bash, zsh, Git Bash or `sh` (not PowerShell or cmd). `<old-folder>` and `<new-folder>` are the folder's paths from the repository root, as the `update-from-templates` warning prints them (for example `src/old-name` and `src/new-name`):
 
